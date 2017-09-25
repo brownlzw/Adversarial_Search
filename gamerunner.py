@@ -25,7 +25,7 @@ def run_game(asp, bots, visualizer=None, delay=0.2):
 		time.sleep(delay)
 
 	while not(asp.is_terminal_state(state)):
-		decision = bots[state.player_to_move()](asp, 3, MyImplementation.eval_func)
+		decision = bots[state.player_to_move()](asp)
 
 		available_actions = asp.get_available_actions(state)
 
@@ -46,7 +46,10 @@ def run_game(asp, bots, visualizer=None, delay=0.2):
 
 def main():
 	game = TTTProblem()
-	bots = [MyImplementation.alpha_beta_cutoff, MyImplementation.alpha_beta_cutoff]
+	# bots = [MyImplementation.minimax, MyImplementation.minimax]
+	# bots = [MyImplementation.alpha_beta, MyImplementation.alpha_beta]
+	# bots = [MyImplementation.alpha_beta_cutoff, MyImplementation.alpha_beta_cutoff]
+	bots = [MyImplementation.general_minimax, MyImplementation.general_minimax]
 
 	# runs game and prints final scores
 	print run_game(game, bots, TTTProblem.visualize_state)
