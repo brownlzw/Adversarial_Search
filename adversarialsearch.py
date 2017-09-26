@@ -13,7 +13,7 @@ def minimax(asp):
 	"""
 	def min_value(state):
 		if asp.is_terminal_state(state):
-			return asp.evaluate_state(state)[first]
+			return asp.evaluate_state(state)[player]
 		val = float("inf")
 		for act in asp.get_available_actions(state):
 			val = min(val, max_value(asp.transition(state, act)))
@@ -21,14 +21,14 @@ def minimax(asp):
 
 	def max_value(state):
 		if asp.is_terminal_state(state):
-			return asp.evaluate_state(state)[first]
+			return asp.evaluate_state(state)[player]
 		val = -float("inf")
 		for act in asp.get_available_actions(state):
 			val = max(val, min_value(asp.transition(state, act)))
 		return val
 
 	start = asp.get_start_state()
-	first = start.player_to_move()
+	player = start.player_to_move()
 	if asp.is_terminal_state(start):
 		return asp.evaluate_state(start)
 	max_val = -float("inf")
@@ -48,7 +48,7 @@ def alpha_beta(asp):
 	"""
 	def min_value(state, alpha, beta):
 		if asp.is_terminal_state(state):
-			return asp.evaluate_state(state)[first]
+			return asp.evaluate_state(state)[player]
 		val = float("inf")
 		for act in asp.get_available_actions(state):
 			val = min(val, max_value(asp.transition(state, act), alpha, beta))
@@ -59,7 +59,7 @@ def alpha_beta(asp):
 
 	def max_value(state, alpha, beta):
 		if asp.is_terminal_state(state):
-			return asp.evaluate_state(state)[first]
+			return asp.evaluate_state(state)[player]
 		val = -float("inf")
 		for act in asp.get_available_actions(state):
 			val = max(val, min_value(asp.transition(state, act), alpha, beta))
@@ -69,15 +69,17 @@ def alpha_beta(asp):
 		return val
 
 	start = asp.get_start_state()
-	first = start.player_to_move()
+	player = start.player_to_move()
 	if asp.is_terminal_state(start):
 		return asp.evaluate_state(start)
+	alpha = -float("inf")
+	beta = float("inf")
 	max_val = -float("inf")
 	max_action = None
 	for action in asp.get_available_actions(start):
-		child = min_value(asp.transition(start, action), -float("inf"), float("inf"))
-		if child > max_val:
-			max_val = child
+		child_val = min_value(asp.transition(start, action), alpha, beta)
+		if child_val > max_val:
+			max_val = child_val
 			max_action = action
 	return max_action
 
@@ -90,8 +92,8 @@ def alpha_beta_cutoff(asp, cutoff_ply, eval_func):
 	- search through the asp using alpha-beta pruning
 	- cut off the search after cutoff_ply moves have been made.
 	 For example, when cutoff_ply = 1, use eval_func to evaluate
-	 states that result from your first move. When cutoff_ply = 2, use
-	 eval_func to evaluate states that result from your opponent's first move.
+	 states that result from your player move. When cutoff_ply = 2, use
+	 eval_func to evaluate states that result from your opponent's player move.
 	 When cutoff_ply = 3 use eval_func to evaluate the states that result from
 	 your second move.
 	You may assume that cutoff_ply > 0.
@@ -102,7 +104,7 @@ def alpha_beta_cutoff(asp, cutoff_ply, eval_func):
 	"""
 	def min_value(state, alpha, beta, d):
 		if asp.is_terminal_state(state):
-			return asp.evaluate_state(state)[first]
+			return asp.evaluate_state(state)[player]
 		if d >= cutoff_ply:
 			return eval_func(state)
 		val = float("inf")
@@ -115,7 +117,7 @@ def alpha_beta_cutoff(asp, cutoff_ply, eval_func):
 
 	def max_value(state, alpha, beta, d):
 		if asp.is_terminal_state(state):
-			return asp.evaluate_state(state)[first]
+			return asp.evaluate_state(state)[player]
 		if d >= cutoff_ply:
 			return eval_func(state)
 		val = -float("inf")
@@ -127,15 +129,15 @@ def alpha_beta_cutoff(asp, cutoff_ply, eval_func):
 		return val
 
 	start = asp.get_start_state()
-	first = start.player_to_move()
+	player = start.player_to_move()
 	if asp.is_terminal_state(start):
 		return asp.evaluate_state(start)
 	max_val = -float("inf")
 	max_action = None
 	for action in asp.get_available_actions(start):
-		child = min_value(asp.transition(start, action), -float("inf"), float("inf"), 0)
-		if child > max_val:
-			max_val = child
+		child_val = min_value(asp.transition(start, action), -float("inf"), float("inf"), 0)
+		if child_val > max_val:
+			max_val = child_val
 			max_action = action
 	return max_action
 
@@ -147,11 +149,11 @@ def general_minimax(asp):
 	"""
 	def min_value(state):
 		if asp.is_terminal_state(state):
-			return asp.evaluate_state(state)[first]
+			return asp.evaluate_state(state)[player]
 		val = float("inf")
 		for act in asp.get_available_actions(state):
 			next_state = asp.transition(state, act)
-			if next_state.player_to_move() == first:
+			if next_state.player_to_move() == player:
 				val = min(val, max_value(next_state))
 			else:
 				val = min(val, min_value(next_state))
@@ -159,25 +161,25 @@ def general_minimax(asp):
 
 	def max_value(state):
 		if asp.is_terminal_state(state):
-			return asp.evaluate_state(state)[first]
+			return asp.evaluate_state(state)[player]
 		val = -float("inf")
 		for act in asp.get_available_actions(state):
 			next_state = asp.transition(state, act)
-			if next_state.player_to_move() == first:
+			if next_state.player_to_move() == player:
 				val = max(val, max_value(next_state))
 			else:
 				val = max(val, min_value(next_state))
 		return val
 
 	start = asp.get_start_state()
-	first = start.player_to_move()
+	player = start.player_to_move()
 	if asp.is_terminal_state(start):
 		return asp.evaluate_state(start)
 	max_val = -float("inf")
 	max_action = None
 	for action in asp.get_available_actions(start):
 		child_state = asp.transition(start, action)
-		if child_state.player_to_move() == first:
+		if child_state.player_to_move() == player:
 			next_val = max_value(child_state)
 		else:
 			next_val = min_value(child_state)
@@ -200,11 +202,11 @@ def example_dag():
 			  [False, False, False, False, False, False, False],
 			  [False, False, False, False, False, False, False],
 			  [False, False, False, False, False, False, False]]
-	start_state = DAGState(0,0)
+	start_state = DAGState(1,1)
 	terminal_indices = Set([3, 4, 5, 6])
 	evaluations_at_terminal = {3: [-1, 1], 4: [-2, 2], 5: [-3, 3], 6: [-4, 4]}
 	turns = [0, 1, 1, 0, 0, 0, 0]
 	dag = GameDAG(matrix, start_state, terminal_indices, evaluations_at_terminal,turns)
 	return dag
 
-print general_minimax(example_dag())
+print alpha_beta(example_dag())
