@@ -81,10 +81,25 @@ def alpha_beta(asp):
 		if child_val > max_val:
 			max_val = child_val
 			max_action = action
+		alpha = max(alpha, max_val)
 	return max_action
 
-# def eval_func(state):
-# 	return 1
+
+def eval_func(state):
+	if state == 1:
+		return -2
+	if state == 2:
+		return -4
+	if state == 3:
+		return -1
+	if state == 4:
+		return -2
+	if state == 5:
+		return -3
+	if state == 6:
+		return -4
+	else:
+		return -5
 
 def alpha_beta_cutoff(asp, cutoff_ply, eval_func):
 	"""
@@ -105,7 +120,7 @@ def alpha_beta_cutoff(asp, cutoff_ply, eval_func):
 	def min_value(state, alpha, beta, d):
 		if asp.is_terminal_state(state):
 			return asp.evaluate_state(state)[player]
-		if d >= cutoff_ply:
+		if d == cutoff_ply:
 			return eval_func(state)
 		val = float("inf")
 		for act in asp.get_available_actions(state):
@@ -118,7 +133,7 @@ def alpha_beta_cutoff(asp, cutoff_ply, eval_func):
 	def max_value(state, alpha, beta, d):
 		if asp.is_terminal_state(state):
 			return asp.evaluate_state(state)[player]
-		if d >= cutoff_ply:
+		if d == cutoff_ply:
 			return eval_func(state)
 		val = -float("inf")
 		for act in asp.get_available_actions(state):
@@ -132,13 +147,16 @@ def alpha_beta_cutoff(asp, cutoff_ply, eval_func):
 	player = start.player_to_move()
 	if asp.is_terminal_state(start):
 		return asp.evaluate_state(start)
+	alpha = -float("inf")
+	beta = float("inf")
 	max_val = -float("inf")
 	max_action = None
 	for action in asp.get_available_actions(start):
-		child_val = min_value(asp.transition(start, action), -float("inf"), float("inf"), 0)
+		child_val = min_value(asp.transition(start, action), alpha, beta, 1)
 		if child_val > max_val:
 			max_val = child_val
 			max_action = action
+		alpha = max(alpha, max_val)
 	return max_action
 
 def general_minimax(asp):
@@ -202,11 +220,14 @@ def example_dag():
 			  [False, False, False, False, False, False, False],
 			  [False, False, False, False, False, False, False],
 			  [False, False, False, False, False, False, False]]
-	start_state = DAGState(1,1)
+	start_state = DAGState(0,0)
 	terminal_indices = Set([3, 4, 5, 6])
 	evaluations_at_terminal = {3: [-1, 1], 4: [-2, 2], 5: [-3, 3], 6: [-4, 4]}
 	turns = [0, 1, 1, 0, 0, 0, 0]
 	dag = GameDAG(matrix, start_state, terminal_indices, evaluations_at_terminal,turns)
 	return dag
 
+print minimax(example_dag())
 print alpha_beta(example_dag())
+print alpha_beta_cutoff(example_dag(), 1, eval_func)
+print general_minimax(example_dag())
